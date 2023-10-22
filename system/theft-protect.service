@@ -1,0 +1,11 @@
+[Unit]
+Description=Theft Protection Daemon (Accelerometer-based screen lock)
+After=graphical-session.target
+
+[Service]
+ExecStart=/bin/bash %h/.local/bin/theft-protect-daemon.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target
