@@ -1,0 +1,15 @@
+[Unit]
+Description=Theft Protection Service using Accelerometer
+After=graphical-session.target
+
+[Service]
+# IMPORTANT: Change 'your_username' to your actual username
+User=your_username
+# You can also use %u which is a systemd specifier for the user running the service
+# User=%u
+ExecStart=/usr/bin/python3 /usr/local/bin/theft-protect-daemon.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target
