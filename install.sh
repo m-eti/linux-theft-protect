@@ -51,13 +51,22 @@ else
     echo "Existing configuration file found. Skipping installation of default."
 fi
 
-echo "Enabling and reloading the user service..."
-export XDG_RUNTIME_DIR="/run/user/$(id -u $LOGGED_IN_USER)"
-sudo -E -u "$LOGGED_IN_USER" systemctl --user daemon-reload
-sudo -E -u "$LOGGED_IN_USER" systemctl --user enable theft-protect.service
+echo "Reloading systemd user daemon and enabling the service..."
+
+# Check if the user's systemd instance is running. If not, we can't enable the service.
+if ! pgrep -u "$LOGGED_IN_USER" systemd > /dev/null; then
+    echo "Warning: User '$LOGGED_IN_USER' does not have a running systemd user instance."
+    echo "Could not enable the service automatically."
+    echo "Please enable it manually after logging in:"
+    echo "systemctl --user enable --now theft-protect.service"
+else
+    # Use runuser to correctly execute commands within the user's session context
+    runuser -l "$LOGGED_IN_USER" -c "systemctl --user daemon-reload"
+    runuser -l "$LOGGED_IN_USER" -c "systemctl --user enable theft-protect.service"
+fi
 
 echo "Installation complete!"
 echo "The service will now start automatically whenever '$LOGGED_IN_USER' logs in."
-echo "To manually start it, run (without sudo): systemctl --user start theft-protect.service"
+echo "To manually start it now, run (without sudo): systemctl --user start theft-protect.service"
 echo "To check its status, run (without sudo): systemctl --user status theft-protect.service"
 echo "Please review the settings in $CONFIG_DIR/config.ini to adjust sensitivity."
